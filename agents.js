@@ -49,7 +49,7 @@ class BFSAgent {
   expandFrontier() {
     for (let d=0; d<4; d++) {
       let newPos = this.pos.copy().add(dirX[d], dirY[d]);
-      if (this.world.inRange(newPos) && this.world.color[newPos.x][newPos.y] != this.world.OBSTACLE && this.world.stroke[newPos.x][newPos.y] == this.world.UNEXPLORED) {
+      if (this.world.inRange(newPos) && this.world.color[newPos.x][newPos.y] != this.world.OBSTACLE && this.world.taint[newPos.x][newPos.y] == this.world.UNEXPLORED) {
         this.world.frontier(newPos);
         this.queue.push(newPos);
       }

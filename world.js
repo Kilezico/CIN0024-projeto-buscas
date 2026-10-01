@@ -12,20 +12,18 @@ class World {
     this.AGENT = color(200, 200, 10);
 
     this.UNEXPLORED = color(0, 0, 0, 0);
-    this.EXPLORED = color(0, 50, 10);
-    this.FRONTIER = color(0, 255, 80);
-    this.POINTER = color(255, 255, 255);
+    this.EXPLORED = color(0, 50, 10, 180);
+    this.FRONTIER = color(0, 255, 80, 100);
+    this.POINTER = color(255, 255, 255, 150);
     
     this.GROUND_COST = 1;
     this.MUD_COST = 5;
     this.WATER_COST = 13;
     
-    this.strokeWeight = 3;
-
     this.noise = Array(h).fill().map(() => Array(w).fill(0));
     this.cost = Array(h).fill().map(() => Array(w).fill(0));
     this.color = Array(h).fill().map(() => Array(w).fill(this.GROUND));
-    this.stroke = Array(h).fill().map(() => Array(w).fill(this.UNEXPLORED));
+    this.taint = Array(h).fill().map(() => Array(w).fill(this.UNEXPLORED));
 
     this.generateMap();
     
@@ -34,19 +32,19 @@ class World {
   }
 
   frontier(pos) {
-    this.stroke[pos.x][pos.y] = this.FRONTIER;
+    this.taint[pos.x][pos.y] = this.FRONTIER;
   }
 
   explore(pos) {
-    this.stroke[pos.x][pos.y] = this.EXPLORED;
+    this.taint[pos.x][pos.y] = this.EXPLORED;
   }
 
   pointer(pos) {
-    this.stroke[pos.x][pos.y] = this.POINTER;
+    this.taint[pos.x][pos.y] = this.POINTER;
   }
 
   clear() {
-    this.stroke = Array(this.h).fill().map(() => Array(this.w).fill(this.UNEXPLORED));
+    this.taint = Array(this.h).fill().map(() => Array(this.w).fill(this.UNEXPLORED));
     this.food = null;
     this.agent = null;
   }
@@ -94,18 +92,12 @@ class World {
     let lenW = width/this.w, lenH = height/this.h;
     for (let i=0; i<this.h; i++) {
       for (let j = 0; j < this.w; j++) {
-        if (this.stroke[i][j] == this.UNEXPLORED) {
-          noStroke();
-          fill(this.color[i][j]);
-          rect(j*lenW, i*lenH, lenW+1, lenH+1);
-        } else {
-          noStroke();
-          fill(this.stroke[i][j]);
-          rect(j*lenW, i*lenH, lenW+1, lenH+1);
-  
-          fill(this.color[i][j]);
-          rect(j*lenW + this.strokeWeight, i*lenH + this.strokeWeight, lenW - 2*this.strokeWeight, lenH - 2*this.strokeWeight);
-        }
+        noStroke();
+        fill(this.color[i][j]);
+        rect(j*lenW, i*lenH, lenW+1, lenH+1);
+
+        fill(this.taint[i][j]);
+        rect(j*lenW, i*lenH, lenW+1, lenH+1);
       }
     }
 
