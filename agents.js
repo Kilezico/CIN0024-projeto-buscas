@@ -16,6 +16,8 @@ class Agent {
     
     this.stage = 0;
 
+    this.foods = 0;
+
     this.path = Array();
   }
 
@@ -33,6 +35,7 @@ class Agent {
       }
     } else if (this.stage == 2) {
       if (this.path.length <= 0) {
+        this.foods++;
         this.reset();
         this.world.clear();
         this.stage = 0;
@@ -43,9 +46,9 @@ class Agent {
           this.path.pop();
         } else {
           let tgt = this.getRealCoords(back);
-          let dist = tgt.dist(this.world.agent);
+          let distt = tgt.dist(this.world.agent);
           let vel = tgt
-          tgt.sub(this.world.agent).normalize().mult(min(dist, this.world.speed[back.x][back.y]));
+          tgt.sub(this.world.agent).normalize().mult(min(distt, this.world.speed[back.x][back.y]));
 
           this.world.agent.add(vel);
         }
@@ -139,5 +142,51 @@ class BFSAgent extends Agent {
     this.start_pos = this.pos;
     
     this.queue = Array();
+  }
+}
+
+class DFSAgent extends Agent {
+  constructor(world) {
+    super(world);
+    this.stack = Array();
+    this.queue = Array();
+  }
+  chooseFrontier(){
+    this.world.explore(this.pos);
+    if (this.stack.length == 0) { //não achou a comida porque a pilha acabou
+      this.stage = -1;
+      return;
+    }
+    let newPos = this.stack.pop();
+    this.world.pointer(newPos);
+    this.pos = newPos;
+    if (
+      this.pos.x == this.world.food.x &&
+      this.pos.y == this.world.food.y
+    ) {
+      this.foundFood();
+    }
+  }
+  expandFrontier(){
+    for (let d = 0; d < dirX.length; d++) {
+      let newPos = this.pos.copy().add(dirX[d], dirY[d]);
+      if (
+        this.world.inRange(newPos) &&
+        this.world.color[newPos.x][newPos.y] != this.world.OBSTACLE &&
+        this.world.taint[newPos.x][newPos.y] == this.world.UNEXPLORED
+      ) {
+        this.world.frontier(newPos);
+        this.stack.push(newPos);
+        this.parent[newPos.x][newPos.y] = this.pos; //salva o pai para poder reconstruir o caminho depois
+      }
+    }
+  }
+  reset() {
+    this.path = Array();
+    this.parent = Array(this.world.h).fill().map(() => Array(this.world.w).fill(-1));
+    this.parent[this.pos.x][this.pos.y] = this.pos;
+    this.start_pos = this.pos;
+    this.stack = Array(); //reinicializa a pilha com a nova posição atual após comer
+    this.stack.push(this.pos);
   }
 }
