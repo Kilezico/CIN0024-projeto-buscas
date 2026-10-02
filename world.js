@@ -24,9 +24,14 @@ class World {
     this.GROUND_SPEED = 4;
     this.MUD_SPEED = 2;
     this.WATER_SPEED = 1;
+
+    this.GROUND_COST = 1;
+    this.MUD_COST = 2;
+    this.WATER_COST = 4;
     
     this.noise = Array(h).fill().map(() => Array(w).fill(0));
     this.speed = Array(h).fill().map(() => Array(w).fill(0));
+    this.cost = Array(h).fill().map(() => Array(w).fill(0));
     this.color = Array(h).fill().map(() => Array(w).fill(this.GROUND));
     this.taint = Array(h).fill().map(() => Array(w).fill(this.UNEXPLORED));
 
@@ -68,12 +73,15 @@ class World {
         if (this.noise[i][j] < 0.33) {
           this.speed[i][j] = this.WATER_SPEED;
           this.color[i][j] = this.WATER;
+          this.cost[i][j] = this.WATER_COST;
         } else if (this.noise[i][j] < 0.45) {
           this.speed[i][j] = this.MUD_SPEED;
           this.color[i][j] = this.MUD;
+          this.cost[i][j] = this.MUD_COST;
         } else if (this.noise[i][j] < 0.65) {
           this.speed[i][j] = this.GROUND_SPEED;
           this.color[i][j] = this.GROUND;
+          this.cost[i][j] = this.GROUND_COST;
         } else {
           this.color[i][j] = this.OBSTACLE;
           this.speed[i][j] = 0;
