@@ -1,8 +1,12 @@
 
 class World {
-  constructor(w, h) {
+  constructor(wid, hei, w, h) {
+    this.width = wid;
+    this.height = hei;
     this.w = w;
     this.h = h;
+    this.lenW = wid/w;
+    this.lenH = hei/h;
 
     this.GROUND = color(150, 115, 78);
     this.MUD = color(84, 59, 14);
@@ -15,13 +19,14 @@ class World {
     this.EXPLORED = color(0, 50, 10, 180);
     this.FRONTIER = color(0, 255, 80, 100);
     this.POINTER = color(255, 255, 255, 150);
+    this.PATH = color(167, 0, 167, 75);
     
-    this.GROUND_COST = 1;
-    this.MUD_COST = 5;
-    this.WATER_COST = 13;
+    this.GROUND_SPEED = 4;
+    this.MUD_SPEED = 2;
+    this.WATER_SPEED = 1;
     
     this.noise = Array(h).fill().map(() => Array(w).fill(0));
-    this.cost = Array(h).fill().map(() => Array(w).fill(0));
+    this.speed = Array(h).fill().map(() => Array(w).fill(0));
     this.color = Array(h).fill().map(() => Array(w).fill(this.GROUND));
     this.taint = Array(h).fill().map(() => Array(w).fill(this.UNEXPLORED));
 
@@ -43,10 +48,13 @@ class World {
     this.taint[pos.x][pos.y] = this.POINTER;
   }
 
+  path(pos) {
+    this.taint[pos.x][pos.y] = this.PATH;
+  }
+
   clear() {
     this.taint = Array(this.h).fill().map(() => Array(this.w).fill(this.UNEXPLORED));
-    this.food = null;
-    this.agent = null;
+    this.food = this.generatePosition();
   }
 
   inRange(pos) {
@@ -58,16 +66,17 @@ class World {
     for (let i=0; i<this.h; i++) {
       for (let j=0; j<this.w; j++) {
         if (this.noise[i][j] < 0.33) {
-          this.cost[i][j] = this.WATER_COST;
+          this.speed[i][j] = this.WATER_SPEED;
           this.color[i][j] = this.WATER;
         } else if (this.noise[i][j] < 0.45) {
-          this.cost[i][j] = this.MUD_COST;
+          this.speed[i][j] = this.MUD_SPEED;
           this.color[i][j] = this.MUD;
         } else if (this.noise[i][j] < 0.65) {
-          this.cost[i][j] = this.GROUND_COST;
+          this.speed[i][j] = this.GROUND_SPEED;
           this.color[i][j] = this.GROUND;
         } else {
           this.color[i][j] = this.OBSTACLE;
+          this.speed[i][j] = 0;
         }
       }
     }
@@ -89,7 +98,7 @@ class World {
   }
   
   drawMap() {
-    let lenW = width/this.w, lenH = height/this.h;
+    let lenW = this.width/this.w, lenH = this.height/this.h;
     for (let i=0; i<this.h; i++) {
       for (let j = 0; j < this.w; j++) {
         noStroke();
@@ -111,8 +120,8 @@ class World {
       push();
       stroke(0);
       fill(this.AGENT);
-      translate(this.agent.y * lenW + lenW / 2, this.agent.x * lenH + lenH / 2);
-      // translate(this.agent.x, this.agent.y);
+      // translate(this.agent.y * lenW + lenW / 2, this.agent.x * lenH + lenH / 2);
+      translate(this.agent.y, this.agent.x);
       rotate(frameCount / 100);
       star(0, 0, lenW * 0.2, lenH * 0.45, 5);
       pop();
@@ -120,7 +129,7 @@ class World {
   }
   
   drawNoise() {
-    let lenW = width/this.w, lenH = height/this.h;
+    let lenW = this.width/this.w, lenH = this.height/this.h;
     for (let i=0; i<this.h; i++) {
       for (let j=0; j<this.w; j++) {
         noStroke();

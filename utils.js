@@ -3,8 +3,10 @@ function randint(l, r) {
   return l + floor(random(0, r-l+1));
 }
 
-const dirX = [0, 0, -1, 1];
-const dirY = [1, -1, 0, 0];
+const dirX = [0, -1, 0, 1];
+const dirY = [1, 0, -1, 0];
+// const dirX = [-1, -2, -2, -1, 1, 2, 2, 1];
+// const dirY = [2, 1, -1, -2, -2, -1, 1, 2];
 
 /*
  * @name Star
