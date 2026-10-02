@@ -4,13 +4,13 @@ let agent = null;
 
 function setup() {
   createCanvas(1000, 1000);
-
-  world = new World(1000, 1000, 25, 25);
+  world = new World(600,500,25,25);
+  
 
 }
 
 function draw() {
-  background(220);
+  background(0);
 
   if (agent) {
     agent.update();
@@ -18,6 +18,13 @@ function draw() {
   
   world.drawMap();
 
+   if (agent) {
+      fill(255);          
+      textSize(24);    
+      textAlign(LEFT, TOP); 
+      text("Comidas coletadas: " + agent.foods, 640, 50);
+    }
+  
   // console.log(frameRate());
 }
 
@@ -28,6 +35,9 @@ function keyPressed() {
       world.clear();
       agent = new BFSAgent(world);
       break;
+    case '2':
+      world.clear();
+      agent = new DFSAgent(world)
     case 'f':
       world.food = world.generatePosition();
       break;
