@@ -5,7 +5,7 @@ let agent = null;
 function setup() {
   createCanvas(1000, 1000);
 
-  world = new World(25, 25);
+  world = new World(1000, 1000, 25, 25);
 
 }
 
