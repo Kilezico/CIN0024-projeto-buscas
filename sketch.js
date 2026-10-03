@@ -37,7 +37,11 @@ function keyPressed() {
       break;
     case '2':
       world.clear();
-      agent = new DFSAgent(world)
+      agent = new DFSAgent(world);
+    case '3':
+      world.clear();
+      agent = new UCSAgent(world);
+      break;
     case 'f':
       world.food = world.generatePosition();
       break;
