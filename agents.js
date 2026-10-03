@@ -195,6 +195,8 @@ class DFSAgent extends Agent {
 class UCSAgent extends Agent {
   constructor(world) {
     super(world);
+    
+    this.parent[this.pos.x][this.pos.y] = this.pos.copy(); // posicao inicial na matriz de pais
 
     // Lista de posicoes que ainda podem ser exploradas
     // Cada elemento guarda a posicao e o custo acumulado
