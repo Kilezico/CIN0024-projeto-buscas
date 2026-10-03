@@ -38,6 +38,7 @@ function keyPressed() {
     case '2':
       world.clear();
       agent = new DFSAgent(world);
+      break;
     case '3':
       world.clear();
       agent = new UCSAgent(world);
