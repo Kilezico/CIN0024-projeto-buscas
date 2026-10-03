@@ -189,6 +189,7 @@ class DFSAgent extends Agent {
     this.stack = Array(); //reinicializa a pilha com a nova posição atual após comer
     this.stack.push(this.pos);
   }
+}
 
 // custo unico (ucs)
 class UCSAgent extends Agent {
@@ -334,6 +335,4 @@ class UCSAgent extends Agent {
       cost: 0
     });
   }
-}
-  
 }
