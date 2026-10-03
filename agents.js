@@ -190,3 +190,151 @@ class DFSAgent extends Agent {
     this.stack.push(this.pos);
   }
 }
+
+// custo unico (ucs)
+class UCSAgent extends Agent {
+  constructor(world) {
+    super(world);
+    
+    this.parent[this.pos.x][this.pos.y] = this.pos.copy(); // posicao inicial na matriz de pais
+
+    // Lista de posicoes que ainda podem ser exploradas
+    // Cada elemento guarda a posicao e o custo acumulado
+    this.frontier = [];
+
+    // Menor custo conhecido para chegar a cada posicao
+    this.gScore = Array(this.world.h)
+      .fill()
+      .map(() => Array(this.world.w).fill(Infinity));
+
+    // Marca as posicoes cujo menor custo ja foi confirmado
+    this.closed = Array(this.world.h)
+      .fill()
+      .map(() => Array(this.world.w).fill(false));
+
+    // O estado inicial tem custo zero
+    this.gScore[this.pos.x][this.pos.y] = 0;
+
+    // A posicao inicial tambem entra na fronteira
+    this.frontier.push({
+      pos: this.pos.copy(),
+      cost: 0
+    });
+  }
+
+  chooseFrontier() {
+    // Marca como explorada a posicao anteriormente visitada
+    this.world.explore(this.pos);
+
+    // Se nao houver mais posicoes, nao existe caminho
+    if (this.frontier.length === 0) {
+      this.stage = -1;
+      return;
+    }
+
+    // Ordena a fronteira pelo menor custo acumulado
+    this.frontier.sort((a, b) => a.cost - b.cost);
+
+    // Retira a posicao de menor custo
+    let current = this.frontier.shift();
+
+    // Ignora entradas antigas, caso o custo tenha sido atualizado
+    while (
+      current &&
+      (
+        current.cost !== this.gScore[current.pos.x][current.pos.y] ||
+        this.closed[current.pos.x][current.pos.y]
+      )
+    ) {
+      if (this.frontier.length === 0) {
+        this.stage = -1;
+        return;
+      }
+
+      current = this.frontier.shift();
+    }
+
+    // Atualiza a posicao atual do agente
+    this.pos = current.pos.copy();
+    this.closed[this.pos.x][this.pos.y] = true;
+
+    // e destaca no mapa
+    this.world.pointer(this.pos);
+
+    // se ja encontrou a comida
+    if (
+      this.pos.x === this.world.food.x &&
+      this.pos.y === this.world.food.y
+    ) {
+      this.foundFood();
+    }
+  }
+
+  expandFrontier() {
+    for (let d = 0; d < dirX.length; d++) {
+      let newPos = this.pos.copy().add(dirX[d], dirY[d]);
+
+      // verifica se a posição eh valida e nao eh um obstaculo.
+      if (
+        !this.world.inRange(newPos) ||
+        this.world.color[newPos.x][newPos.y] === this.world.OBSTACLE ||
+        this.closed[newPos.x][newPos.y]
+      ) {
+        continue;
+      }
+
+      // Custo para chegar ao vizinho:
+      // custo acumulado atual + custo do terreno de destino
+      let newCost =
+        this.gScore[this.pos.x][this.pos.y] +
+        this.world.cost[newPos.x][newPos.y];
+
+      // So atualiza se encontrou um caminho de menor custo
+      if (newCost < this.gScore[newPos.x][newPos.y]) {
+        this.gScore[newPos.x][newPos.y] = newCost;
+
+        // Registra o antecessor para reconstruir o caminho
+        this.parent[newPos.x][newPos.y] = this.pos.copy();
+
+        // Adiciona aa fronteira para ser avaliada
+        this.frontier.push({
+          pos: newPos.copy(),
+          cost: newCost
+        });
+
+        // Mostra a posicao na fronteira
+        this.world.frontier(newPos);
+      }
+    }
+  }
+
+  reset() {
+    // Reinicia as estruturas apos comer comida
+    this.path = [];
+
+    this.parent = Array(this.world.h)
+      .fill()
+      .map(() => Array(this.world.w).fill(-1));
+
+    this.parent[this.pos.x][this.pos.y] = this.pos.copy();
+    this.start_pos = this.pos.copy();
+
+    this.frontier = [];
+
+    this.gScore = Array(this.world.h)
+      .fill()
+      .map(() => Array(this.world.w).fill(Infinity));
+
+    this.closed = Array(this.world.h)
+      .fill()
+      .map(() => Array(this.world.w).fill(false));
+
+    this.gScore[this.pos.x][this.pos.y] = 0;
+
+    // A posicao atual passa a ser o novo estado inicial
+    this.frontier.push({
+      pos: this.pos.copy(),
+      cost: 0
+    });
+  }
+}
