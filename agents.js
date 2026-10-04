@@ -405,11 +405,19 @@ class AStarAgent extends Agent {
   constructor(world) {
     super(world);
 
+    // Lista de nós a serem avaliados (Fronteira/Open Set)
     this.frontier = [];
+    
+    // Custo real acumulado até cada célula: g(n)
     this.gScore = Array(this.world.h).fill().map(() => Array(this.world.w).fill(Infinity));
+    
+    // Custo total estimado até o objetivo: f(n) = g(n) + h(n)
     this.fScore = Array(this.world.h).fill().map(() => Array(this.world.w).fill(Infinity));
+    
+    // Matriz para controle do Closed Set (nós já processados)
     this.closed = Array(this.world.h).fill().map(() => Array(this.world.w).fill(false));
 
+    // Inicialização da posição de origem (Custo inicial g = 0)
     this.gScore[this.pos.x][this.pos.y] = 0;
     this.fScore[this.pos.x][this.pos.y] = this.h(this.pos);
 
@@ -419,7 +427,7 @@ class AStarAgent extends Agent {
     });
   }
 
-  // Função Heurística: Distância de Manhattan até a comida
+  // heurística A*: distância de danhattan (útil para grids sem diagonais)
   h(pos) {
     return Math.abs(pos.x - this.world.food.x) + Math.abs(pos.y - this.world.food.y);
   }
@@ -428,38 +436,43 @@ class AStarAgent extends Agent {
     for (let d = 0; d < dirX.length; d++) {
       let newPos = this.pos.copy().add(dirX[d], dirY[d]);
 
-      // Ignora nós fora do mapa, obstáculos ou já fechados
+      // Descarta posições inválidas, obstáculos ou células já finalizadas (Closed Set)
       if (!this.world.inRange(newPos) || this.world.color[newPos.x][newPos.y] === this.world.OBSTACLE || this.closed[newPos.x][newPos.y]) {
         continue;
       }
 
+      // Custo acumulado para chegar ao vizinho através do nó atual
       let tentativeG = this.gScore[this.pos.x][this.pos.y] + this.world.cost[newPos.x][newPos.y];
 
+      // Se encontrou um caminho mais rápido para este vizinho, atualiza as métricas
       if (tentativeG < this.gScore[newPos.x][newPos.y]) {
-        let f = tentativeG + this.h(newPos);
+        let f = tentativeG + this.h(newPos); // f(n) = g(n) + h(n)
 
-        this.parent[newPos.x][newPos.y] = this.pos.copy();
+        this.parent[newPos.x][newPos.y] = this.pos.copy(); // Guarda rastro para reconstrução do caminho
         this.gScore[newPos.x][newPos.y] = tentativeG;
         this.fScore[newPos.x][newPos.y] = f;
 
         this.frontier.push({ pos: newPos.copy(), f: f });
-        this.world.frontier(newPos);
+        this.world.frontier(newPos); // Visualização na interface
       }
     }
   }
 
+  // Seleciona o próximo nó de menor custo f(n) para processar
   chooseFrontier() {
     this.world.explore(this.pos);
 
+    // Se a fronteira esvaziar sem achar a comida, não existe caminho
     if (this.frontier.length === 0) {
       this.stage = -1;
       return;
     }
 
+    // Ordena para obter o nó com menor estimativa f(n) no topo (Min-Priority)
     this.frontier.sort((a, b) => a.f - b.f);
     let current = this.frontier.shift();
 
-    // Ignora entradas obsoletas
+    // Filtra nós obsoletos na fronteira (entradas antigas com fScore defasado)
     while (current && (current.f !== this.fScore[current.pos.x][current.pos.y] || this.closed[current.pos.x][current.pos.y])) {
       if (this.frontier.length === 0) {
         this.stage = -1;
@@ -468,15 +481,18 @@ class AStarAgent extends Agent {
       current = this.frontier.shift();
     }
 
+    // Move o agente e insere a posição no Closed Set
     this.pos = current.pos.copy();
     this.closed[this.pos.x][this.pos.y] = true;
     this.world.pointer(this.pos);
 
+    // Condição de parada (objetivo alcançado)
     if (this.pos.x === this.world.food.x && this.pos.y === this.world.food.y) {
       this.foundFood();
     }
   }
 
+  // Reinicia o estado das estruturas do A* para uma nova busca
   reset() {
     this.path = [];
     this.start_pos = this.pos.copy();
