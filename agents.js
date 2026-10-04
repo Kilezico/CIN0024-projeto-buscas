@@ -338,3 +338,65 @@ class UCSAgent extends Agent {
     });
   }
 }
+
+class GreedyAgent extends Agent{
+  constructor(world){
+    super(world);
+
+    this.front = [];
+
+  }
+
+  h(pos){
+    return Math.abs(pos.x - this.world.food.x) + Math.abs(pos.y - this.world.food.y);
+    //return Math.sqrt(Math.pow(pos.x - this.world.food.x, 2) + Math.pow(pos.x - this.world.food.x, 2));
+  }
+
+  expandFrontier(){
+    for (let i = 0; i < 4; i++){
+      let vizPos = createVector(this.pos.x + dirX[i], this.pos.y + dirY[i]);
+
+      if (
+        this.world.inRange(vizPos) &&
+        this.world.color[vizPos.x][vizPos.y] != this.world.OBSTACLE &&
+        this.world.taint[vizPos.x][vizPos.y] == this.world.UNEXPLORED
+      ) {
+
+        this.world.frontier(vizPos);
+        this.parent[vizPos.x][vizPos.y] = this.pos;
+
+        this.front.push({pos: vizPos, h: this.h(vizPos)});
+
+      }
+
+    }
+  }
+
+  chooseFrontier(){
+    this.world.explore(this.pos);
+
+    if (this.front.length == 0){
+      this.stage = -1; 
+      return;
+    }
+
+    this.front.sort((a, b) => a.h - b.h);
+    let novaPos = this.front.shift().pos;
+    this.pos = novaPos;
+    this.world.pointer(novaPos);
+
+    if (this.pos.x == this.world.food.x && this.pos.y == this.world.food.y){
+      this.foundFood();
+    }
+  }
+
+  reset(){
+    this.path = Array();
+    this.parent = Array(this.world.h).fill().map(() => Array(this.world.w).fill(-1));
+    this.parent[this.pos.x][this.pos.y] = this.pos;
+    this.start_pos = this.pos;
+    
+    this.front = [];
+  }
+
+}

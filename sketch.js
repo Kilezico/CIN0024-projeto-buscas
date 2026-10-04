@@ -43,6 +43,10 @@ function keyPressed() {
       world.clear();
       agent = new UCSAgent(world);
       break;
+    case '4':
+      world.clear();
+      agent = new GreedyAgent(world);
+      break;
     case 'f':
       world.food = world.generatePosition();
       break;
