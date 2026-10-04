@@ -400,3 +400,101 @@ class GreedyAgent extends Agent{
   }
 
 }
+
+class AStarAgent extends Agent {
+  constructor(world) {
+    super(world);
+
+    this.frontier = [];
+    this.gScore = Array(this.world.h).fill().map(() => Array(this.world.w).fill(Infinity));
+    this.fScore = Array(this.world.h).fill().map(() => Array(this.world.w).fill(Infinity));
+    this.closed = Array(this.world.h).fill().map(() => Array(this.world.w).fill(false));
+
+    this.gScore[this.pos.x][this.pos.y] = 0;
+    this.fScore[this.pos.x][this.pos.y] = this.h(this.pos);
+
+    this.frontier.push({
+      pos: this.pos.copy(),
+      f: this.fScore[this.pos.x][this.pos.y]
+    });
+  }
+
+  // Função Heurística: Distância de Manhattan até a comida
+  h(pos) {
+    return Math.abs(pos.x - this.world.food.x) + Math.abs(pos.y - this.world.food.y);
+  }
+
+  expandFrontier() {
+    for (let d = 0; d < dirX.length; d++) {
+      let newPos = this.pos.copy().add(dirX[d], dirY[d]);
+
+      // Ignora nós fora do mapa, obstáculos ou já fechados
+      if (!this.world.inRange(newPos) || this.world.color[newPos.x][newPos.y] === this.world.OBSTACLE || this.closed[newPos.x][newPos.y]) {
+        continue;
+      }
+
+      let tentativeG = this.gScore[this.pos.x][this.pos.y] + this.world.cost[newPos.x][newPos.y];
+
+      if (tentativeG < this.gScore[newPos.x][newPos.y]) {
+        let f = tentativeG + this.h(newPos);
+
+        this.parent[newPos.x][newPos.y] = this.pos.copy();
+        this.gScore[newPos.x][newPos.y] = tentativeG;
+        this.fScore[newPos.x][newPos.y] = f;
+
+        this.frontier.push({ pos: newPos.copy(), f: f });
+        this.world.frontier(newPos);
+      }
+    }
+  }
+
+  chooseFrontier() {
+    this.world.explore(this.pos);
+
+    if (this.frontier.length === 0) {
+      this.stage = -1;
+      return;
+    }
+
+    this.frontier.sort((a, b) => a.f - b.f);
+    let current = this.frontier.shift();
+
+    // Ignora entradas obsoletas
+    while (current && (current.f !== this.fScore[current.pos.x][current.pos.y] || this.closed[current.pos.x][current.pos.y])) {
+      if (this.frontier.length === 0) {
+        this.stage = -1;
+        return;
+      }
+      current = this.frontier.shift();
+    }
+
+    this.pos = current.pos.copy();
+    this.closed[this.pos.x][this.pos.y] = true;
+    this.world.pointer(this.pos);
+
+    if (this.pos.x === this.world.food.x && this.pos.y === this.world.food.y) {
+      this.foundFood();
+    }
+  }
+
+  reset() {
+    this.path = [];
+    this.start_pos = this.pos.copy();
+
+    this.parent = Array(this.world.h).fill().map(() => Array(this.world.w).fill(-1));
+    this.parent[this.pos.x][this.pos.y] = this.pos.copy();
+
+    this.frontier = [];
+    this.gScore = Array(this.world.h).fill().map(() => Array(this.world.w).fill(Infinity));
+    this.fScore = Array(this.world.h).fill().map(() => Array(this.world.w).fill(Infinity));
+    this.closed = Array(this.world.h).fill().map(() => Array(this.world.w).fill(false));
+
+    this.gScore[this.pos.x][this.pos.y] = 0;
+    this.fScore[this.pos.x][this.pos.y] = this.h(this.pos);
+
+    this.frontier.push({
+      pos: this.pos.copy(),
+      f: this.fScore[this.pos.x][this.pos.y]
+    });
+  }
+}
