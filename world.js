@@ -59,7 +59,7 @@ class World {
 
   clear() {
     this.taint = Array(this.h).fill().map(() => Array(this.w).fill(this.UNEXPLORED));
-    this.food = this.generatePosition();
+    this.food = this.food? this.food:this.generatePosition()
   }
 
   inRange(pos) {
@@ -91,6 +91,8 @@ class World {
   }
   
   generateNoise() {
+    noiseSeed(millis());
+    
     for (let i=0; i<this.h; i++) {
       for (let j=0; j<this.w; j++) {
         this.noise[i][j] = noise(i/this.h*10, j/this.w*10);
