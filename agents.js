@@ -1,8 +1,8 @@
 class Agent {
-  constructor(world) {
+  constructor(world, startPos = null) {
     this.world = world;
-    
-    this.pos = this.world.generatePosition();
+
+    this.pos = startPos ? startPos : this.world.generatePosition();
     this.start_pos = this.pos;
     this.world.agent = this.getRealCoords(this.pos);
     this.world.pointer(this.pos);
@@ -38,6 +38,7 @@ class Agent {
         this.foods++;
         this.reset();
         this.world.clear();
+        this.world.food = this.world.generatePosition();
         this.stage = 0;
       } else {
         let back = this.path[this.path.length-1];
@@ -95,8 +96,8 @@ class Agent {
 }
 
 class BFSAgent extends Agent {
-  constructor(world) {
-    super(world);
+  constructor(world, startPos = null) {
+    super(world, startPos);
 
     this.queue = Array();
   }
@@ -146,8 +147,8 @@ class BFSAgent extends Agent {
 }
 
 class DFSAgent extends Agent {
-  constructor(world) {
-    super(world);
+  constructor(world, startPos = null) {
+    super(world, startPos);
     this.stack = Array();
     this.queue = Array();
   }
@@ -193,8 +194,8 @@ class DFSAgent extends Agent {
 
 // custo unico (ucs)
 class UCSAgent extends Agent {
-  constructor(world) {
-    super(world);
+  constructor(world, startPos = null) {
+    super(world, startPos);
     
     this.parent[this.pos.x][this.pos.y] = this.pos.copy(); // posicao inicial na matriz de pais
 
@@ -340,8 +341,8 @@ class UCSAgent extends Agent {
 }
 
 class GreedyAgent extends Agent{
-  constructor(world){
-    super(world);
+  constructor(world, startPos = null) {
+    super(world, startPos);
 
     this.front = [];
 
@@ -402,8 +403,8 @@ class GreedyAgent extends Agent{
 }
 
 class AStarAgent extends Agent {
-  constructor(world) {
-    super(world);
+  constructor(world, startPos = null) {
+    super(world, startPos);
 
     // Lista de nós a serem avaliados (Fronteira/Open Set)
     this.frontier = [];
@@ -512,5 +513,28 @@ class AStarAgent extends Agent {
       pos: this.pos.copy(),
       f: this.fScore[this.pos.x][this.pos.y]
     });
+  }
+}
+
+class DefaultAgent extends Agent {
+  constructor(world, startPos = null) {
+    super(world, startPos);
+  }
+
+  // Sobrescreve o update para que ele não tente rodar passos de busca
+  update() {
+    // Não executa nada (agente parado)
+  }
+
+  chooseFrontier() {
+    // Sem busca
+  }
+  
+  expandFrontier() {
+    // Sem busca
+  }
+
+  reset() {
+    // Sem busca
   }
 }
