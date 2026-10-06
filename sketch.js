@@ -3,10 +3,8 @@ let world;
 let agent = null;
 
 function setup() {
-  createCanvas(1000, 1000);
-  world = new World(600,500,25,25);
-  
-
+  createCanvas(1100, 800);
+  world = new World(800,800,25,25);
 }
 
 function draw() {
@@ -18,13 +16,12 @@ function draw() {
   
   world.drawMap();
 
-   if (agent) {
-      fill(255);          
-      textSize(24);    
-      textAlign(LEFT, TOP); 
-      text("Comidas coletadas: " + agent.foods, 640, 50);
-     
-    }
+  if (agent) {
+    fill(255);          
+    textSize(24);    
+    textAlign(LEFT, TOP); 
+    text("Comidas coletadas: " + agent.foods, width-275, 50);
+  }
   
   // console.log(frameRate());
 
@@ -32,7 +29,7 @@ function draw() {
   textSize(16);
   textAlign(LEFT, TOP);
   
-  let startX = 640;
+  let startX = width-275;
   let startY = 120;
   let lineHeight = 22;
 

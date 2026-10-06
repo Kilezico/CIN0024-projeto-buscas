@@ -21,13 +21,13 @@ class World {
     this.POINTER = color(255, 255, 255, 150);
     this.PATH = color(167, 0, 167, 75);
     
-    this.GROUND_SPEED = 4;
-    this.MUD_SPEED = 2;
+    this.GROUND_SPEED = 7;
+    this.MUD_SPEED = 7/3;
     this.WATER_SPEED = 1;
 
     this.GROUND_COST = 1;
-    this.MUD_COST = 2;
-    this.WATER_COST = 4;
+    this.MUD_COST = 3;
+    this.WATER_COST = 7;
     
     this.noise = Array(h).fill().map(() => Array(w).fill(0));
     this.speed = Array(h).fill().map(() => Array(w).fill(0));
